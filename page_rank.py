@@ -14,4 +14,9 @@ for i in range(iterations):
 
 ranks.toDF(["Page", "Rank"]).write.option("header", True).csv(output_file)
 
+<<<<<<< HEAD
 spark.stop()
+=======
+spark.stop()
+
+>>>>>>> 32973f3f62b14ef8bac9aa250398dd0979e32065
