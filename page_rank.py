@@ -1,13 +1,18 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, collect_list
 import sys
 input_file = sys.argv[1]
 output_file = sys.argv[2]
 spark = SparkSession.builder.appName("Page_Ranking").getOrCreate()
-links = spark.read.csv(input_file, comment="#", sep=r'\t').toDF("Page", "Neighbor")
+links = spark.read.csv(input_file, comment="#", sep=r'\t').toDF("Page", "Neighbor").groupBy("Page").agg(collect_list("Neighbor"))
 ranks = links.select("Page").distinct().withColumn("Rank", lit(1))
 # links = links.rdd
 iterations = 1
 for i in range(iterations):
-    contribs = links.join(ranks, ['Page']).rdd.flatMap(lambda x: (x[0], x[1], x[2])).collect()
-    print(contribs)
+    contribs = links.join(ranks, ['Page']).rdd.flatMap(lambda x: ((y, x[2]/len(x[1])) for y in x[1]))
+    ranks = contribs.reduceByKey(lambda x,y: x + y).mapValues(lambda x: 0.15 + 0.85 * x).sortBy(lambda x: x[1], ascending=False)
+
+ranks.toDF(["Page", "Rank"]).write.option("header", True).csv(output_file)
+
+spark.stop()
+
