@@ -7,16 +7,11 @@ spark = SparkSession.builder.appName("Page_Ranking").getOrCreate()
 links = spark.read.csv(input_file, comment="#", sep=r'\t').toDF("Page", "Neighbor").groupBy("Page").agg(collect_list("Neighbor"))
 ranks = links.select("Page").distinct().withColumn("Rank", lit(1))
 # links = links.rdd
-iterations = 1
+iterations = 5
 for i in range(iterations):
-    contribs = links.join(ranks, ['Page']).rdd.flatMap(lambda x: ((y, x[2]/len(x[1])) for y in x[1]))
-    ranks = contribs.reduceByKey(lambda x,y: x + y).mapValues(lambda x: 0.15 + 0.85 * x).sortBy(lambda x: x[1], ascending=False)
+   contribs = links.join(ranks, ['Page']).rdd.flatMap(lambda x: ((y, x[2]/len(x[1])) for y in x[1]))
+   ranks = contribs.reduceByKey(lambda x,y: x + y).mapValues(lambda x: 0.15 + 0.85 * x).sortBy(lambda x: x[1], ascending=True).toDF(["Page", "Rank"])
 
-ranks.toDF(["Page", "Rank"]).write.option("header", True).csv(output_file)
+ranks.write.option("header", True).csv(output_file)
 
-<<<<<<< HEAD
 spark.stop()
-=======
-spark.stop()
-
->>>>>>> 32973f3f62b14ef8bac9aa250398dd0979e32065
