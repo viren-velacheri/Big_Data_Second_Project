@@ -8,4 +8,6 @@ The first command is for running program on small dataset while
 second command is for running on the large dataset
 
 <b> ./small_run.sh input_file output_file </b>
+
+
 <b> ./large_run.sh input_file output_file </b>
