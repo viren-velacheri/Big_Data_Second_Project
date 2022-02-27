@@ -4,9 +4,9 @@ import sys
 input_file = sys.argv[1]
 output_file = sys.argv[2]
 spark = SparkSession.builder.appName("Page_Ranking").getOrCreate()
-num_repartitions = 5
+num_repartitions = 60
 links = spark.read.csv(input_file, comment="#", sep=r'\t').toDF("Page", "Neighbor").select(lower(col('Page')).alias('Page'), lower(col('Neighbor')).alias('Neighbor')).filter("(Neighbor NOT LIKE '%:%' OR Neighbor LIKE '%category:%') AND (Page NOT LIKE '%:%' OR Page LIKE '%category:%')").groupBy("Page").agg(collect_list("Neighbor")).repartition(num_repartitions)
-ranks = links.select("Page").distinct().withColumn("Rank", lit(1)).repartition(num_repartition)
+ranks = links.select("Page").distinct().withColumn("Rank", lit(1)).repartition(num_repartitions)
 # links = links.rdd
 num_repartitions = 1
 iterations = 10

@@ -1,3 +1,3 @@
 #!/bin/bash
 # this is for running page ranking algorithm on small dataset
-python3 large_dataset_page_rank.py $1 $2
+/mydata/spark-3.2.1-bin-hadoop3.2/bin/spark-submit large_dataset_page_rank.py $1 $2
